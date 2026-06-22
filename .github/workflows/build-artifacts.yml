@@ -1,0 +1,139 @@
+name: build artifacts
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# This workflow is build-only PR validation. Release publishing is intentionally
+# deferred until pull requests prove the artifact builds are healthy.
+jobs:
+  build-static-libs:
+    name: static musl libraries
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Build static musl libraries
+        run: just artifact-static
+
+      - name: Collect static artifacts
+        run: |
+          mkdir -p artifacts/static-musl
+          cp internal/api/libwasmvm_muslc.a artifacts/static-musl/
+          cp internal/api/libwasmvm_muslc.aarch64.a artifacts/static-musl/
+          cp internal/api/bindings.h artifacts/static-musl/
+          (cd artifacts/static-musl && sha256sum -- bindings.h libwasmvm_muslc.a libwasmvm_muslc.aarch64.a > checksums.txt && cat checksums.txt)
+
+      - name: Upload x86_64 musl static library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-muslc-linux-x86_64
+          path: |
+            artifacts/static-musl/libwasmvm_muslc.a
+            artifacts/static-musl/checksums.txt
+          if-no-files-found: error
+
+      - name: Upload aarch64 musl static library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-muslc-linux-aarch64
+          path: |
+            artifacts/static-musl/libwasmvm_muslc.aarch64.a
+            artifacts/static-musl/checksums.txt
+          if-no-files-found: error
+
+      - name: Upload static bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-muslc-bindings
+          path: artifacts/static-musl/bindings.h
+          if-no-files-found: error
+
+  build-shared-linux:
+    name: Linux shared libraries
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Build Linux shared libraries
+        run: just artifact-linux
+
+      - name: Collect Linux shared artifacts
+        run: |
+          mkdir -p artifacts/linux-shared
+          cp internal/api/libwasmvm.x86_64.so artifacts/linux-shared/
+          cp internal/api/libwasmvm.aarch64.so artifacts/linux-shared/
+          cp internal/api/bindings.h artifacts/linux-shared/
+          (cd artifacts/linux-shared && sha256sum -- bindings.h libwasmvm.aarch64.so libwasmvm.x86_64.so > checksums.txt && cat checksums.txt)
+
+      - name: Upload Linux shared libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-glibc-linux-shared
+          path: |
+            artifacts/linux-shared/libwasmvm.x86_64.so
+            artifacts/linux-shared/libwasmvm.aarch64.so
+            artifacts/linux-shared/checksums.txt
+          if-no-files-found: error
+
+      - name: Upload Linux shared bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-glibc-linux-bindings
+          path: artifacts/linux-shared/bindings.h
+          if-no-files-found: error
+
+  build-macos-artifacts:
+    name: Darwin artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Build Darwin shared library
+        run: just artifact-darwin
+
+      - name: Collect Darwin artifacts
+        run: |
+          mkdir -p artifacts/darwin
+          cp internal/api/libwasmvm.dylib artifacts/darwin/
+          cp internal/api/libwasmvmstatic_darwin.a artifacts/darwin/
+          cp internal/api/bindings.h artifacts/darwin/
+          (cd artifacts/darwin && sha256sum -- bindings.h libwasmvm.dylib libwasmvmstatic_darwin.a > checksums.txt && cat checksums.txt)
+
+      - name: Upload Darwin artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-darwin
+          path: |
+            artifacts/darwin/libwasmvm.dylib
+            artifacts/darwin/libwasmvmstatic_darwin.a
+            artifacts/darwin/checksums.txt
+          if-no-files-found: error
+
+      - name: Upload Darwin bindings
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-darwin-bindings
+          path: artifacts/darwin/bindings.h
+          if-no-files-found: error

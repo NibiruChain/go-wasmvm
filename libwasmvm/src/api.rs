@@ -107,7 +107,9 @@ impl BackendApi for GoApi {
 
         let result = output
             .ok_or_else(|| BackendError::unknown("Unset output"))
-            .and_then(|human_data| String::from_utf8(human_data).map_err(BackendError::from));
+            .and_then(|human_data| {
+                String::from_utf8(human_data).map_err(BackendError::from)
+            });
         (result, gas_info)
     }
 }
