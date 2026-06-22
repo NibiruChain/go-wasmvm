@@ -300,8 +300,9 @@ mod tests {
 
     #[test]
     fn from_std_str_utf8error_works() {
-        let broken = b"Hello \xF0\x90\x80World";
-        let error: RustError = str::from_utf8(broken).unwrap_err().into();
+        let mut broken = b"Hello World".to_vec();
+        broken.splice(6..6, [0xF0, 0x90, 0x80]);
+        let error: RustError = str::from_utf8(&broken).unwrap_err().into();
         match error {
             RustError::InvalidUtf8 { msg, .. } => {
                 assert_eq!(msg, "invalid utf-8 sequence of 3 bytes from index 6")

@@ -22,6 +22,9 @@ jobs:
         with:
           tool: just
 
+      - name: Build static builder image
+        run: make -C builders docker-image-alpine
+
       - name: Build static musl libraries
         run: just artifact-static
 
@@ -70,6 +73,9 @@ jobs:
         with:
           tool: just
 
+      - name: Build Linux builder image
+        run: make -C builders docker-image-centos7
+
       - name: Build Linux shared libraries
         run: just artifact-linux
 
@@ -109,6 +115,9 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: just
+
+      - name: Build Darwin builder image
+        run: make -C builders docker-image-cross
 
       - name: Build Darwin shared library
         run: just artifact-darwin

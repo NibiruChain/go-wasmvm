@@ -20,9 +20,13 @@ install:
     fi
   fi
 
+alias i := install
+
 # Build Go and Rust libraries.
 build:
   make build
+
+alias b := build
 
 # Build the Rust libwasmvm shared library.
 build-rust:
@@ -36,7 +40,7 @@ build-go:
 fmt:
   #!/usr/bin/env bash
   set -euo pipefail
-  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.70.0}" fmt)
+  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.74.1}" fmt)
   gofumpt -w -s .
   shfmt -w .
 
@@ -48,7 +52,7 @@ fmt-check:
 
 # Check Rust formatting.
 rust-fmt-check:
-  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.70.0}" fmt -- --check)
+  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.74.1}" fmt -- --check)
 
 # Check Go formatting.
 go-fmt-check:
@@ -72,6 +76,8 @@ alias lint := clippy
 # Run Rust unit tests.
 test:
   (cd libwasmvm && cargo test)
+
+alias t := test
 
 # Run Go tests.
 test-go:

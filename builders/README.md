@@ -19,6 +19,10 @@ versions of the builder images.
 
 ## Changelog
 
+**Version 0018:**
+
+- Update Rust to 1.74.1.
+
 **Version 0017:**
 
 - Update Rust to 1.73.0.
