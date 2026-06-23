@@ -21,7 +21,7 @@ versions of the builder images.
 
 **Version 0018:**
 
-- Update Rust to 1.74.1.
+- Update Rust to stable for Nibiru fork artifact builds.
 
 **Version 0017:**
 
