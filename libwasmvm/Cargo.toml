@@ -31,7 +31,7 @@ cosmwasm-std = { version = "1.5.11", features = [
   "stargate",
   "iterator",
 ] }
-cosmwasm-vm = { path = "../../nibi-wasm/packages/cosmwasm-vm", features = [
+cosmwasm-vm = { git = "https://github.com/NibiruChain/nibiru-wasm.git", branch = "main", features = [
   "staking",
   "stargate",
   "iterator",
