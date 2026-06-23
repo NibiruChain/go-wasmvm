@@ -45,7 +45,7 @@ ensure we can switch between compiler versions in some range.
 ## Production Rust compiler
 
 This is the version set in the builders: `builders/Dockerfile.alpine`,
-`builders/Dockerfile.centos7` and `Dockerfile.cross`.
+`builders/Dockerfile.debian` and `Dockerfile.cross`.
 
 ## Min Rust compiler
 
@@ -63,6 +63,6 @@ We currently use the following version:
 
 | Type                     | Rust version | Note                              |
 | ------------------------ | ------------ | --------------------------------- |
-| Production Rust compiler | 1.74.1       | Builders version 0018             |
-| Min Rust compiler        | 1.74.1       | Supports builder versions >= 0018 |
-| Tooling Rust compiler    | 1.74.1       |                                   |
+| Production Rust compiler | stable       | Nibiru fork artifact builders     |
+| Min Rust compiler        | stable       | Matches `nibi-wasm` dependency graph |
+| Tooling Rust compiler    | stable       |                                   |

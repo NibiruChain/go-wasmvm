@@ -23,7 +23,7 @@ jobs:
           tool: just
 
       - name: Build static builder image
-        run: make -C builders docker-image-alpine
+        run: just docker-image-static
 
       - name: Build static musl libraries
         run: just artifact-static
@@ -74,7 +74,7 @@ jobs:
           tool: just
 
       - name: Build Linux builder image
-        run: make -C builders docker-image-centos7
+        run: just docker-image-linux
 
       - name: Build Linux shared libraries
         run: just artifact-linux
@@ -117,7 +117,7 @@ jobs:
           tool: just
 
       - name: Build Darwin builder image
-        run: make -C builders docker-image-cross
+        run: just docker-image-cross
 
       - name: Build Darwin shared library
         run: just artifact-darwin

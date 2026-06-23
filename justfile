@@ -153,18 +153,41 @@ shellcheck:
   set -euo pipefail
   git ls-files '*.sh' | xargs -r shellcheck
 
+# Build the static musl Docker builder image.
+docker-image-static:
+  docker build --pull --progress=plain builders -t cosmwasm/go-ext-builder:0018-alpine -f builders/Dockerfile.alpine
+
+# Build the Linux shared Docker builder image.
+docker-image-linux:
+  docker build --pull --progress=plain --platform=linux/amd64 builders -t cosmwasm/go-ext-builder:0018-debian -f builders/Dockerfile.debian
+
+# Build the Darwin and Windows cross Docker builder image.
+docker-image-cross:
+  docker build --pull --progress=plain builders -t cosmwasm/go-ext-builder:0018-cross -f builders/Dockerfile.cross
+
 # Build static musl release artifacts.
 artifact-static:
   make release-build-alpine
 
 # Build Linux shared release artifacts.
 artifact-linux:
-  make release-build-linux
+  #!/usr/bin/env bash
+  set -euo pipefail
+  rm -rf libwasmvm/target/x86_64-unknown-linux-gnu/release
+  rm -rf libwasmvm/target/aarch64-unknown-linux-gnu/release
+  docker run --rm -u "$(id -u):$(id -g)" -v "$PWD/libwasmvm:/code" cosmwasm/go-ext-builder:0018-debian build_linux.sh
+  cp libwasmvm/artifacts/libwasmvm.x86_64.so internal/api
+  cp libwasmvm/artifacts/libwasmvm.aarch64.so internal/api
+  just update-bindings
 
 # Build Darwin shared and static release artifacts.
 artifact-darwin:
   make release-build-macos
   make release-build-macos-static
+
+# Copy generated Rust bindings into the Go package.
+update-bindings:
+  cp libwasmvm/bindings.h internal/api
 
 # Run Rust PR checks.
 ci-rust:

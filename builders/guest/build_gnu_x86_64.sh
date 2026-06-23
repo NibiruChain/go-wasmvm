@@ -2,12 +2,12 @@
 set -o errexit -o nounset -o pipefail
 
 export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+export TARGET_DIR="/target" # write to the guest filesystem instead of the host checkout
 
-# See https://github.com/CosmWasm/wasmvm/issues/222#issuecomment-880616953 for two approaches to
-# enable stripping through cargo (if that is desired).
+# No stripping implemented (see https://github.com/CosmWasm/wasmvm/issues/222#issuecomment-2260007943).
 
 echo "Starting x86_64-unknown-linux-gnu build"
 export CC=clang
 export CXX=clang++
-cargo build --release --target x86_64-unknown-linux-gnu
-cp target/x86_64-unknown-linux-gnu/release/libwasmvm.so artifacts/libwasmvm.x86_64.so
+cargo build --release --target-dir="$TARGET_DIR" --target x86_64-unknown-linux-gnu
+cp "$TARGET_DIR/x86_64-unknown-linux-gnu/release/libwasmvm.so" artifacts/libwasmvm.x86_64.so
