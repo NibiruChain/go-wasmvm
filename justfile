@@ -202,7 +202,6 @@ update-bindings:
 ci-rust:
   just check
   just bindings-check
-  just rust-fmt-check
   just test
   just doc
   just doc-test

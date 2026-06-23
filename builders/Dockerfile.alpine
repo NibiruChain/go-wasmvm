@@ -8,13 +8,20 @@ FROM golang:1.20.10-alpine
 
 ENV RUSTUP_HOME=/usr/local/rustup \
   CARGO_HOME=/usr/local/cargo \
+  LLVM_CONFIG_PATH=/usr/lib/llvm16/bin/llvm-config \
+  LIBCLANG_PATH=/usr/lib/llvm16/lib \
   PATH=/usr/local/cargo/bin:$PATH
 
 # this comes from standard alpine nightly file
 #  https://github.com/rust-lang/docker-rust-nightly/blob/master/alpine3.12/Dockerfile
 # with some changes to support our toolchain, etc
 RUN set -eux \
-  && apk add --no-cache ca-certificates build-base
+  && apk add --no-cache \
+    build-base \
+    ca-certificates \
+    clang16-dev \
+    clang16-static \
+    llvm16-dev
 
 RUN wget "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-musl/rustup-init" \
   && chmod +x rustup-init \
