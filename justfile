@@ -40,7 +40,7 @@ build-go:
 fmt:
   #!/usr/bin/env bash
   set -euo pipefail
-  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.74.1}" fmt)
+  (cd libwasmvm && cargo fmt)
   gofumpt -w -s .
   shfmt -w .
 
@@ -52,7 +52,7 @@ fmt-check:
 
 # Check Rust formatting.
 rust-fmt-check:
-  (cd libwasmvm && cargo +"${RUST_TOOLCHAIN:-1.74.1}" fmt -- --check)
+  (cd libwasmvm && cargo fmt -- --check)
 
 # Check Go formatting.
 go-fmt-check:
