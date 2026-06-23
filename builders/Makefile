@@ -16,7 +16,7 @@ docker-image-cross:
 
 .PHONY: docker-image-alpine
 docker-image-alpine:
-	docker build --pull --progress=plain . -t $(BUILDERS_PREFIX)-alpine -f ./Dockerfile.alpine
+	docker build --pull --progress=plain --platform=linux/amd64 . -t $(BUILDERS_PREFIX)-alpine -f ./Dockerfile.alpine
 
 .PHONY: docker-images
 docker-images: docker-image-debian docker-image-cross docker-image-alpine

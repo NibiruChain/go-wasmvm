@@ -155,7 +155,7 @@ shellcheck:
 
 # Build the static musl Docker builder image.
 docker-image-static:
-  docker build --pull --progress=plain builders -t cosmwasm/go-ext-builder:0018-alpine -f builders/Dockerfile.alpine
+  docker build --pull --progress=plain --platform=linux/amd64 builders -t cosmwasm/go-ext-builder:0018-alpine -f builders/Dockerfile.alpine
 
 # Build the Linux shared Docker builder image.
 docker-image-linux:
@@ -184,6 +184,15 @@ artifact-linux:
 artifact-darwin:
   make release-build-macos
   make release-build-macos-static
+
+# Run the libwasmvm release helper. Use this to install deps, test the helper,
+# dry-run publishing, print the next tag, or run a real GitHub Release publish.
+release *args:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  (cd scripts && bun install --frozen-lockfile)
+  bun run scripts/releaseArtifacts.ts {{args}}
+
 
 # Copy generated Rust bindings into the Go package.
 update-bindings:
