@@ -36,7 +36,7 @@ func withVM(t *testing.T) *VM {
 
 	t.Cleanup(func() {
 		vm.Cleanup()
-		os.RemoveAll(tmpdir)
+		_ = os.RemoveAll(tmpdir)
 	})
 	return vm
 }

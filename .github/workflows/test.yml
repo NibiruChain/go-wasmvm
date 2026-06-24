@@ -120,17 +120,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Go
-        uses: actions/setup-go@v5
+      - name: Install just
+        uses: taiki-e/install-action@v2
         with:
-          go-version: "1.24"
-          cache: true
+          tool: just
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v9
-        with:
-          version: v2.6.1
-          args: --fix=false
+        run: just lint-go --fix=false
 
   native-go-tests:
     name: Native Go tests
@@ -168,27 +164,29 @@ jobs:
   # TODO: Enable this as a scheduled or advisory security workflow if dependency
   # vulnerability visibility becomes useful for this fork.
   cargo-audit:
-    name: Cargo audit (disabled)
-    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    name: Cargo audit
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        if: ${{ vars.ENABLE_CARGO_AUDIT == 'true' }}
 
       - name: Install Rust
+        if: ${{ vars.ENABLE_CARGO_AUDIT == 'true' }}
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-audit
+        if: ${{ vars.ENABLE_CARGO_AUDIT == 'true' }}
         run: cargo install --debug cargo-audit --version 0.21.0 --locked
 
       - name: Run cargo audit
+        if: ${{ vars.ENABLE_CARGO_AUDIT == 'true' }}
         run: just audit
 
   # TODO: Enable this if Windows Rust support matters for future artifact or
   # consumer workflows. The Nibiru release path currently validates Linux only.
   windows-rust-sanity:
-    name: Windows Rust sanity (disabled)
-    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    name: Windows Rust sanity
     runs-on: windows-latest
     timeout-minutes: 45
     defaults:
@@ -196,10 +194,13 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        if: ${{ vars.ENABLE_WINDOWS_RUST_SANITY == 'true' }}
 
       - name: Install Rust
+        if: ${{ vars.ENABLE_WINDOWS_RUST_SANITY == 'true' }}
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run Rust unit tests
+        if: ${{ vars.ENABLE_WINDOWS_RUST_SANITY == 'true' }}
         working-directory: libwasmvm
         run: cargo test

@@ -1,4 +1,4 @@
-name: build artifacts
+name: build
 
 on:
   push:
@@ -50,14 +50,15 @@ jobs:
   # cost. This is stronger than building artifacts because it exercises the Go
   # packages with tag `muslc` inside Alpine.
   alpine-muslc-go-tests:
-    name: Alpine muslc Go tests (disabled)
-    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    name: Alpine muslc Go tests
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+        if: ${{ vars.ENABLE_ALPINE_MUSLC_GO_TESTS == 'true' }}
 
       - name: Build static musl library and run Alpine Go tests
+        if: ${{ vars.ENABLE_ALPINE_MUSLC_GO_TESTS == 'true' }}
         run: make test-alpine
 
   build-shared-linux:

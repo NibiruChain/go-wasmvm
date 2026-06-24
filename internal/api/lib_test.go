@@ -30,7 +30,9 @@ const (
 func TestInitAndReleaseCache(t *testing.T) {
 	tmpdir, err := ioutil.TempDir("", "wasmvm-testing")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpdir)
+	defer func() {
+		_ = os.RemoveAll(tmpdir)
+	}()
 
 	cache, err := InitCache(tmpdir, TESTING_CAPABILITIES, TESTING_CACHE_SIZE, TESTING_MEMORY_LIMIT)
 	require.NoError(t, err)
@@ -42,7 +44,9 @@ func TestInitAndReleaseCache(t *testing.T) {
 func TestInitCacheWorksForNonExistentDir(t *testing.T) {
 	tmpdir, err := ioutil.TempDir("", "wasmvm-testing")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpdir)
+	defer func() {
+		_ = os.RemoveAll(tmpdir)
+	}()
 
 	createMe := filepath.Join(tmpdir, "does-not-yet-exist")
 	cache, err := InitCache(createMe, TESTING_CAPABILITIES, TESTING_CACHE_SIZE, TESTING_MEMORY_LIMIT)
@@ -62,7 +66,9 @@ func TestInitCacheErrorsForBrokenDir(t *testing.T) {
 func TestInitCacheEmptyCapabilities(t *testing.T) {
 	tmpdir, err := ioutil.TempDir("", "wasmvm-testing")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpdir)
+	defer func() {
+		_ = os.RemoveAll(tmpdir)
+	}()
 	cache, err := InitCache(tmpdir, "", TESTING_CACHE_SIZE, TESTING_MEMORY_LIMIT)
 	require.NoError(t, err)
 	ReleaseCache(cache)
@@ -75,7 +81,7 @@ func withCache(t *testing.T) (Cache, func()) {
 	require.NoError(t, err)
 
 	cleanup := func() {
-		os.RemoveAll(tmpdir)
+		_ = os.RemoveAll(tmpdir)
 		ReleaseCache(cache)
 	}
 	return cache, cleanup
@@ -1174,7 +1180,8 @@ func TestFloats(t *testing.T) {
 				result = debugStr(response)
 			}
 			// add the result to the hash
-			hasher.Write([]byte(fmt.Sprintf("%s%d%s", instr, seed, result)))
+			_, err = fmt.Fprintf(hasher, "%s%d%s", instr, seed, result)
+			require.NoError(t, err)
 		}
 	}
 
