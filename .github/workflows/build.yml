@@ -101,57 +101,42 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
-      - name: Defer Darwin artifacts
-        run: |
-          echo "Darwin artifact builds are intentionally out of scope for this PR."
-          echo "This PR validates the Linux shared and static musl artifacts needed by Nibiru localnet/release builds."
+      - uses: actions/checkout@v4
 
-      # Restore this job when Darwin/macOS artifacts are in scope again.
-      #
-      # - uses: actions/checkout@v4
-      #
-      # - name: Install just
-      #   uses: taiki-e/install-action@v2
-      #   with:
-      #     tool: just
-      #
-      # - name: Build Darwin builder image
-      #   run: just docker-image-cross
-      #
-      # - name: Build Darwin shared library
-      #   run: just artifact-darwin
-      #
-      # - name: Collect Darwin artifacts
-      #   run: |
-      #     mkdir -p artifacts/darwin
-      #     cp internal/api/libwasmvm.dylib artifacts/darwin/
-      #     cp internal/api/libwasmvmstatic_darwin.a artifacts/darwin/
-      #     cp internal/api/bindings.h artifacts/darwin/
-      #     (cd artifacts/darwin && sha256sum -- bindings.h libwasmvm.dylib libwasmvmstatic_darwin.a > checksums.txt && cat checksums.txt)
-      #
-      # - name: Upload Darwin artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: libwasmvm-darwin
-      #     path: |
-      #       artifacts/darwin/libwasmvm.dylib
-      #       artifacts/darwin/libwasmvmstatic_darwin.a
-      #       artifacts/darwin/checksums.txt
-      #     if-no-files-found: error
-      #
-      # - name: Upload Darwin bindings
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: libwasmvm-darwin-bindings
-      #     path: artifacts/darwin/bindings.h
-      #     if-no-files-found: error
-      #
+      - name: Install just
+        uses: taiki-e/install-action@v2
+        with:
+          tool: just
+
+      - name: Build Darwin builder image
+        run: just docker-image-cross
+
+      - name: Build Darwin libraries
+        run: just artifact-darwin
+
+      - name: Collect Darwin artifacts
+        run: |
+          mkdir -p artifacts/darwin
+          cp internal/api/libwasmvm.dylib artifacts/darwin/
+          cp internal/api/libwasmvmstatic_darwin.a artifacts/darwin/
+          (cd artifacts/darwin && sha256sum -- libwasmvm.dylib libwasmvmstatic_darwin.a > checksums.txt && cat checksums.txt)
+
+      - name: Upload Darwin libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: libwasmvm-darwin
+          path: |
+            artifacts/darwin/libwasmvm.dylib
+            artifacts/darwin/libwasmvmstatic_darwin.a
+            artifacts/darwin/checksums.txt
+          if-no-files-found: error
 
   publish-wasm-release:
     name: publish libwasmvm release
     needs:
       - build-static-libs
       - build-shared-linux
+      - build-macos-artifacts
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -187,6 +172,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: libwasmvm-glibc
+          path: release-artifacts
+
+      - name: Download tested Darwin artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: libwasmvm-darwin
           path: release-artifacts
 
       - name: Install Bun
