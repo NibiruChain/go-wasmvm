@@ -4,6 +4,7 @@
 *.iml
 .idea
 .vscode
+node_modules/
 
 # no static libraries (35MB+)
 /internal/api/lib*.a

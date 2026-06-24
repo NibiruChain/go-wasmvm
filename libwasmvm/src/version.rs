@@ -24,7 +24,8 @@ mod tests {
 
         // Contains correct data
         let version_ptr = version_str();
-        let version_str = unsafe { CStr::from_ptr(version_ptr) }.to_str().unwrap();
+        let version_str =
+            unsafe { CStr::from_ptr(version_ptr) }.to_str().unwrap();
         // assert_eq!(version_str, "1.2.3");
 
         let mut parts = version_str.split('-');

@@ -243,7 +243,10 @@ mod tests {
         let error = RustError::invalid_utf8(original);
         match error {
             RustError::InvalidUtf8 { msg, .. } => {
-                assert_eq!(msg, "invalid utf-8 sequence of 1 bytes from index 0");
+                assert_eq!(
+                    msg,
+                    "invalid utf-8 sequence of 1 bytes from index 0"
+                );
             }
             _ => panic!("expect different error"),
         }
@@ -297,8 +300,9 @@ mod tests {
 
     #[test]
     fn from_std_str_utf8error_works() {
-        let broken = b"Hello \xF0\x90\x80World";
-        let error: RustError = str::from_utf8(broken).unwrap_err().into();
+        let mut broken = b"Hello World".to_vec();
+        broken.splice(6..6, [0xF0, 0x90, 0x80]);
+        let error: RustError = str::from_utf8(&broken).unwrap_err().into();
         match error {
             RustError::InvalidUtf8 { msg, .. } => {
                 assert_eq!(msg, "invalid utf-8 sequence of 3 bytes from index 6")
@@ -309,9 +313,10 @@ mod tests {
 
     #[test]
     fn from_std_string_fromutf8error_works() {
-        let error: RustError = String::from_utf8(b"Hello \xF0\x90\x80World".to_vec())
-            .unwrap_err()
-            .into();
+        let error: RustError =
+            String::from_utf8(b"Hello \xF0\x90\x80World".to_vec())
+                .unwrap_err()
+                .into();
         match error {
             RustError::InvalidUtf8 { msg, .. } => {
                 assert_eq!(msg, "invalid utf-8 sequence of 3 bytes from index 6")
@@ -361,9 +366,9 @@ mod tests {
         // Ok (checksum)
         let mut error_msg = UnmanagedVector::default();
         let res: Result<Checksum, RustError> = Ok(Checksum::from([
-            0x72, 0x2c, 0x8c, 0x99, 0x3f, 0xd7, 0x5a, 0x76, 0x27, 0xd6, 0x9e, 0xd9, 0x41, 0x34,
-            0x4f, 0xe2, 0xa1, 0x42, 0x3a, 0x3e, 0x75, 0xef, 0xd3, 0xe6, 0x77, 0x8a, 0x14, 0x28,
-            0x84, 0x22, 0x71, 0x04,
+            0x72, 0x2c, 0x8c, 0x99, 0x3f, 0xd7, 0x5a, 0x76, 0x27, 0xd6, 0x9e,
+            0xd9, 0x41, 0x34, 0x4f, 0xe2, 0xa1, 0x42, 0x3a, 0x3e, 0x75, 0xef,
+            0xd3, 0xe6, 0x77, 0x8a, 0x14, 0x28, 0x84, 0x22, 0x71, 0x04,
         ]));
         let data = handle_c_error_binary(res, Some(&mut error_msg));
         assert_eq!(errno().0, ErrnoValue::Success as i32);
@@ -371,9 +376,10 @@ mod tests {
         assert_eq!(
             data,
             vec![
-                0x72, 0x2c, 0x8c, 0x99, 0x3f, 0xd7, 0x5a, 0x76, 0x27, 0xd6, 0x9e, 0xd9, 0x41, 0x34,
-                0x4f, 0xe2, 0xa1, 0x42, 0x3a, 0x3e, 0x75, 0xef, 0xd3, 0xe6, 0x77, 0x8a, 0x14, 0x28,
-                0x84, 0x22, 0x71, 0x04,
+                0x72, 0x2c, 0x8c, 0x99, 0x3f, 0xd7, 0x5a, 0x76, 0x27, 0xd6,
+                0x9e, 0xd9, 0x41, 0x34, 0x4f, 0xe2, 0xa1, 0x42, 0x3a, 0x3e,
+                0x75, 0xef, 0xd3, 0xe6, 0x77, 0x8a, 0x14, 0x28, 0x84, 0x22,
+                0x71, 0x04,
             ]
         );
         let _ = error_msg.consume();

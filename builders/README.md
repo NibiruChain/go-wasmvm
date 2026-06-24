@@ -19,6 +19,11 @@ versions of the builder images.
 
 ## Changelog
 
+**Version 0018:**
+
+- Update Rust to stable for Nibiru fork artifact builds.
+- Add Debian 11 Linux shared-library builder for the Nibiru fork.
+
 **Version 0017:**
 
 - Update Rust to 1.73.0.

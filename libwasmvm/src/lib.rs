@@ -26,7 +26,8 @@ pub use db::{db_t, Db};
 pub use error::GoError;
 pub use gas_report::GasReport;
 pub use memory::{
-    destroy_unmanaged_vector, new_unmanaged_vector, ByteSliceView, U8SliceView, UnmanagedVector,
+    destroy_unmanaged_vector, new_unmanaged_vector, ByteSliceView, U8SliceView,
+    UnmanagedVector,
 };
 pub use querier::GoQuerier;
 pub use storage::GoStorage;

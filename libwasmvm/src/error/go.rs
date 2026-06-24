@@ -140,7 +140,8 @@ mod tests {
 
         // GoError::User with some message
         let error = GoError::User;
-        let error_msg = UnmanagedVector::new(Some(Vec::from(b"kaputt" as &[u8])));
+        let error_msg =
+            UnmanagedVector::new(Some(Vec::from(b"kaputt" as &[u8])));
         let a = unsafe { error.into_result(error_msg, default) };
         assert_eq!(
             a.unwrap_err(),
@@ -168,7 +169,8 @@ mod tests {
 
         // GoError::Other with some message
         let error = GoError::Other;
-        let error_msg = UnmanagedVector::new(Some(Vec::from(b"kaputt" as &[u8])));
+        let error_msg =
+            UnmanagedVector::new(Some(Vec::from(b"kaputt" as &[u8])));
         let a = unsafe { error.into_result(error_msg, default) };
         assert_eq!(
             a.unwrap_err(),

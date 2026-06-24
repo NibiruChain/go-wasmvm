@@ -124,7 +124,10 @@ impl Storage for GoStorage {
         iterator.next_key()
     }
 
-    fn next_value(&mut self, iterator_id: u32) -> BackendResult<Option<Vec<u8>>> {
+    fn next_value(
+        &mut self,
+        iterator_id: u32,
+    ) -> BackendResult<Option<Vec<u8>>> {
         let Some(iterator) = self.iterators.get_mut(&iterator_id) else {
             return (
                 Err(BackendError::iterator_does_not_exist(iterator_id)),

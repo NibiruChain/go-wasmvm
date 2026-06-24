@@ -6,8 +6,12 @@ use std::str::from_utf8;
 use cosmwasm_vm::{capabilities_from_csv, Cache, CacheOptions, Checksum, Size};
 
 use crate::api::GoApi;
-use crate::args::{AVAILABLE_CAPABILITIES_ARG, CACHE_ARG, CHECKSUM_ARG, DATA_DIR_ARG, WASM_ARG};
-use crate::error::{handle_c_error_binary, handle_c_error_default, handle_c_error_ptr, Error};
+use crate::args::{
+    AVAILABLE_CAPABILITIES_ARG, CACHE_ARG, CHECKSUM_ARG, DATA_DIR_ARG, WASM_ARG,
+};
+use crate::error::{
+    handle_c_error_binary, handle_c_error_default, handle_c_error_ptr, Error,
+};
 use crate::memory::{ByteSliceView, UnmanagedVector};
 use crate::querier::GoQuerier;
 use crate::storage::GoStorage;
@@ -15,11 +19,14 @@ use crate::storage::GoStorage;
 #[repr(C)]
 pub struct cache_t {}
 
-pub fn to_cache(ptr: *mut cache_t) -> Option<&'static mut Cache<GoApi, GoStorage, GoQuerier>> {
+pub fn to_cache(
+    ptr: *mut cache_t,
+) -> Option<&'static mut Cache<GoApi, GoStorage, GoQuerier>> {
     if ptr.is_null() {
         None
     } else {
-        let c = unsafe { &mut *(ptr as *mut Cache<GoApi, GoStorage, GoQuerier>) };
+        let c =
+            unsafe { &mut *(ptr as *mut Cache<GoApi, GoStorage, GoQuerier>) };
         Some(c)
     }
 }
@@ -62,16 +69,14 @@ fn do_init_cache(
         .read()
         .ok_or_else(|| Error::unset_arg(AVAILABLE_CAPABILITIES_ARG))?;
     let capabilities = capabilities_from_csv(from_utf8(capabilities_bin)?);
-    let memory_cache_size = Size::mebi(
-        cache_size
-            .try_into()
-            .expect("Cannot convert u32 to usize. What kind of system is this?"),
-    );
-    let instance_memory_limit = Size::mebi(
-        instance_memory_limit
-            .try_into()
-            .expect("Cannot convert u32 to usize. What kind of system is this?"),
-    );
+    let memory_cache_size =
+        Size::mebi(cache_size.try_into().expect(
+            "Cannot convert u32 to usize. What kind of system is this?",
+        ));
+    let instance_memory_limit =
+        Size::mebi(instance_memory_limit.try_into().expect(
+            "Cannot convert u32 to usize. What kind of system is this?",
+        ));
     let options = CacheOptions {
         base_dir: dir_str.into(),
         available_capabilities: capabilities,
@@ -123,11 +128,13 @@ pub extern "C" fn remove_wasm(
     error_msg: Option<&mut UnmanagedVector>,
 ) {
     let r = match to_cache(cache) {
-        Some(c) => catch_unwind(AssertUnwindSafe(move || do_remove_wasm(c, checksum)))
-            .unwrap_or_else(|err| {
-                eprintln!("Panic in do_remove_wasm: {err:?}");
-                Err(Error::panic())
-            }),
+        Some(c) => {
+            catch_unwind(AssertUnwindSafe(move || do_remove_wasm(c, checksum)))
+                .unwrap_or_else(|err| {
+                    eprintln!("Panic in do_remove_wasm: {err:?}");
+                    Err(Error::panic())
+                })
+        }
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     handle_c_error_default(r, error_msg)
@@ -152,11 +159,13 @@ pub extern "C" fn load_wasm(
     error_msg: Option<&mut UnmanagedVector>,
 ) -> UnmanagedVector {
     let r = match to_cache(cache) {
-        Some(c) => catch_unwind(AssertUnwindSafe(move || do_load_wasm(c, checksum)))
-            .unwrap_or_else(|err| {
-                eprintln!("Panic in do_load_wasm: {err:?}");
-                Err(Error::panic())
-            }),
+        Some(c) => {
+            catch_unwind(AssertUnwindSafe(move || do_load_wasm(c, checksum)))
+                .unwrap_or_else(|err| {
+                    eprintln!("Panic in do_load_wasm: {err:?}");
+                    Err(Error::panic())
+                })
+        }
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     let data = handle_c_error_binary(r, error_msg);
@@ -182,12 +191,11 @@ pub extern "C" fn pin(
     error_msg: Option<&mut UnmanagedVector>,
 ) {
     let r = match to_cache(cache) {
-        Some(c) => {
-            catch_unwind(AssertUnwindSafe(move || do_pin(c, checksum))).unwrap_or_else(|err| {
+        Some(c) => catch_unwind(AssertUnwindSafe(move || do_pin(c, checksum)))
+            .unwrap_or_else(|err| {
                 eprintln!("Panic in do_pin: {err:?}");
                 Err(Error::panic())
-            })
-        }
+            }),
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     handle_c_error_default(r, error_msg)
@@ -212,12 +220,11 @@ pub extern "C" fn unpin(
     error_msg: Option<&mut UnmanagedVector>,
 ) {
     let r = match to_cache(cache) {
-        Some(c) => {
-            catch_unwind(AssertUnwindSafe(move || do_unpin(c, checksum))).unwrap_or_else(|err| {
+        Some(c) => catch_unwind(AssertUnwindSafe(move || do_unpin(c, checksum)))
+            .unwrap_or_else(|err| {
                 eprintln!("Panic in do_unpin: {err:?}");
                 Err(Error::panic())
-            })
-        }
+            }),
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     handle_c_error_default(r, error_msg)
@@ -256,10 +263,13 @@ impl From<cosmwasm_vm::AnalysisReport> for AnalysisReport {
             required_capabilities,
         } = report;
 
-        let required_capabilities_utf8 = set_to_csv(required_capabilities).into_bytes();
+        let required_capabilities_utf8 =
+            set_to_csv(required_capabilities).into_bytes();
         AnalysisReport {
             has_ibc_entry_points,
-            required_capabilities: UnmanagedVector::new(Some(required_capabilities_utf8)),
+            required_capabilities: UnmanagedVector::new(Some(
+                required_capabilities_utf8,
+            )),
         }
     }
 }
@@ -277,11 +287,13 @@ pub extern "C" fn analyze_code(
     error_msg: Option<&mut UnmanagedVector>,
 ) -> AnalysisReport {
     let r = match to_cache(cache) {
-        Some(c) => catch_unwind(AssertUnwindSafe(move || do_analyze_code(c, checksum)))
-            .unwrap_or_else(|err| {
-                eprintln!("Panic in do_analyze_code: {err:?}");
-                Err(Error::panic())
-            }),
+        Some(c) => {
+            catch_unwind(AssertUnwindSafe(move || do_analyze_code(c, checksum)))
+                .unwrap_or_else(|err| {
+                    eprintln!("Panic in do_analyze_code: {err:?}");
+                    Err(Error::panic())
+                })
+        }
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     handle_c_error_default(r, error_msg)
@@ -355,19 +367,20 @@ pub extern "C" fn get_metrics(
     error_msg: Option<&mut UnmanagedVector>,
 ) -> Metrics {
     let r = match to_cache(cache) {
-        Some(c) => {
-            catch_unwind(AssertUnwindSafe(move || do_get_metrics(c))).unwrap_or_else(|err| {
+        Some(c) => catch_unwind(AssertUnwindSafe(move || do_get_metrics(c)))
+            .unwrap_or_else(|err| {
                 eprintln!("Panic in do_get_metrics: {err:?}");
                 Err(Error::panic())
-            })
-        }
+            }),
         None => Err(Error::unset_arg(CACHE_ARG)),
     };
     handle_c_error_default(r, error_msg)
 }
 
 #[allow(clippy::unnecessary_wraps)] // Keep unused Result for consistent boilerplate for all fn do_*
-fn do_get_metrics(cache: &mut Cache<GoApi, GoStorage, GoQuerier>) -> Result<Metrics, Error> {
+fn do_get_metrics(
+    cache: &mut Cache<GoApi, GoStorage, GoQuerier>,
+) -> Result<Metrics, Error> {
     Ok(cache.metrics().into())
 }
 
@@ -381,7 +394,9 @@ fn do_get_metrics(cache: &mut Cache<GoApi, GoStorage, GoQuerier>) -> Result<Metr
 pub extern "C" fn release_cache(cache: *mut cache_t) {
     if !cache.is_null() {
         // this will free cache when it goes out of scope
-        let _ = unsafe { Box::from_raw(cache as *mut Cache<GoApi, GoStorage, GoQuerier>) };
+        let _ = unsafe {
+            Box::from_raw(cache as *mut Cache<GoApi, GoStorage, GoQuerier>)
+        };
     }
 }
 
@@ -394,11 +409,13 @@ mod tests {
     use tempfile::TempDir;
 
     static HACKATOM: &[u8] = include_bytes!("../../testdata/hackatom.wasm");
-    static IBC_REFLECT: &[u8] = include_bytes!("../../testdata/ibc_reflect.wasm");
+    static IBC_REFLECT: &[u8] =
+        include_bytes!("../../testdata/ibc_reflect.wasm");
 
     #[test]
     fn init_cache_and_release_cache_work() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -439,7 +456,8 @@ mod tests {
 
     #[test]
     fn save_wasm_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -469,7 +487,8 @@ mod tests {
 
     #[test]
     fn remove_wasm_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -525,7 +544,8 @@ mod tests {
 
     #[test]
     fn load_wasm_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -567,7 +587,8 @@ mod tests {
 
     #[test]
     fn pin_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -617,7 +638,8 @@ mod tests {
 
     #[test]
     fn unpin_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         let mut error_msg = UnmanagedVector::default();
@@ -676,7 +698,8 @@ mod tests {
 
     #[test]
     fn analyze_code_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking,stargate,iterator";
 
         let mut error_msg = UnmanagedVector::default();
@@ -712,7 +735,8 @@ mod tests {
         );
         assert!(error_msg.is_none());
         let _ = error_msg.consume();
-        let checksum_ibc_reflect = checksum_ibc_reflect.consume().unwrap_or_default();
+        let checksum_ibc_reflect =
+            checksum_ibc_reflect.consume().unwrap_or_default();
 
         let mut error_msg = UnmanagedVector::default();
         let hackatom_report = analyze_code(
@@ -735,9 +759,10 @@ mod tests {
         );
         let _ = error_msg.consume();
         assert!(ibc_reflect_report.has_ibc_entry_points);
-        let required_capabilities =
-            String::from_utf8_lossy(&ibc_reflect_report.required_capabilities.consume().unwrap())
-                .to_string();
+        let required_capabilities = String::from_utf8_lossy(
+            &ibc_reflect_report.required_capabilities.consume().unwrap(),
+        )
+        .to_string();
         assert_eq!(required_capabilities, "iterator,stargate");
 
         release_cache(cache_ptr);
@@ -775,7 +800,8 @@ mod tests {
 
     #[test]
     fn get_metrics_works() {
-        let dir: String = TempDir::new().unwrap().path().to_str().unwrap().to_owned();
+        let dir: String =
+            TempDir::new().unwrap().path().to_str().unwrap().to_owned();
         let capabilities = b"staking";
 
         // Init cache
