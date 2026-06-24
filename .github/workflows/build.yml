@@ -46,6 +46,20 @@ jobs:
             artifacts/static-musl/checksums.txt
           if-no-files-found: error
 
+  # TODO: Enable this when static musl Go consumer tests are worth the runtime
+  # cost. This is stronger than building artifacts because it exercises the Go
+  # packages with tag `muslc` inside Alpine.
+  alpine-muslc-go-tests:
+    name: Alpine muslc Go tests (disabled)
+    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build static musl library and run Alpine Go tests
+        run: make test-alpine
+
   build-shared-linux:
     name: Linux shared libraries
     runs-on: ubuntu-latest

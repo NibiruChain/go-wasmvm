@@ -1,6 +1,9 @@
-name: ci
+name: test
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -110,6 +113,25 @@ jobs:
       - name: Run script checks
         run: just ci-scripts
 
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.6.1
+          args: --fix=false
+
   native-go-tests:
     name: Native Go tests
     runs-on: ubuntu-latest
@@ -142,3 +164,42 @@ jobs:
 
       - name: Build Go packages
         run: just build-go
+
+  # TODO: Enable this as a scheduled or advisory security workflow if dependency
+  # vulnerability visibility becomes useful for this fork.
+  cargo-audit:
+    name: Cargo audit (disabled)
+    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install --debug cargo-audit --version 0.21.0 --locked
+
+      - name: Run cargo audit
+        run: just audit
+
+  # TODO: Enable this if Windows Rust support matters for future artifact or
+  # consumer workflows. The Nibiru release path currently validates Linux only.
+  windows-rust-sanity:
+    name: Windows Rust sanity (disabled)
+    if: ${{ github.repository == 'NibiruChain/go-wasmvm-disabled' }}
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Rust unit tests
+        working-directory: libwasmvm
+        run: cargo test
