@@ -17,6 +17,8 @@ const REQUIRED_RELEASE_ARTIFACTS = [
   "libwasmvm_muslc.aarch64.a",
   "libwasmvm.x86_64.so",
   "libwasmvm.aarch64.so",
+  "libwasmvm.dylib",
+  "libwasmvmstatic_darwin.a",
 ] as const
 
 type BumpType = (typeof BUMP_TYPES)[number]

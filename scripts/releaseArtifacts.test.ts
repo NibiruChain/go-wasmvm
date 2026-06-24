@@ -45,6 +45,14 @@ const writeRequiredArtifacts = async (artifactsDir: string): Promise<void> => {
     Bun.file(join(artifactsDir, "libwasmvm.aarch64.so")),
     "glibc arm",
   )
+  await Bun.write(
+    Bun.file(join(artifactsDir, "libwasmvm.dylib")),
+    "darwin universal dylib",
+  )
+  await Bun.write(
+    Bun.file(join(artifactsDir, "libwasmvmstatic_darwin.a")),
+    "darwin universal static",
+  )
 }
 
 describe("normalizeReleaseTag", () => {
@@ -234,6 +242,8 @@ describe("buildPublishDryRunPlan", () => {
           "tmp-artifacts/libwasmvm_muslc.aarch64.a " +
           "tmp-artifacts/libwasmvm.x86_64.so " +
           "tmp-artifacts/libwasmvm.aarch64.so " +
+          "tmp-artifacts/libwasmvm.dylib " +
+          "tmp-artifacts/libwasmvmstatic_darwin.a " +
           '--repo NibiruChain/go-wasmvm --title "libwasmvm v1.6.0" ' +
           "--notes-file <release-body.md>",
       ],
@@ -257,6 +267,8 @@ describe("renderReleaseMetadataMarkdown", () => {
     expect(markdown).toContain("- Source commit: `abc123` Update wasm runtime")
     expect(markdown).toContain("- `libwasmvm_muslc.x86_64.a`")
     expect(markdown).toContain("- `libwasmvm.aarch64.so`")
+    expect(markdown).toContain("- `libwasmvm.dylib`")
+    expect(markdown).toContain("- `libwasmvmstatic_darwin.a`")
     expect(markdown).not.toContain("bindings.h")
   })
 })
