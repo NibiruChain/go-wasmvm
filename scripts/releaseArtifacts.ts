@@ -10,7 +10,7 @@ const FIRST_RELEASE_TAG = "v1.6.0"
 const RELEASE_VERSION_PATTERN = "v[0-9]+\\.[0-9]+\\.[0-9]+"
 const GITHUB_REPO = "NibiruChain/go-wasmvm"
 const LOCAL_ARTIFACTS_DIR = "release-artifacts"
-const RELEASE_BRANCH = "release/nibiru"
+const RELEASE_BRANCH = "main"
 const BUMP_TYPES = ["patch", "minor", "major"] as const
 const REQUIRED_RELEASE_ARTIFACTS = [
   "libwasmvm_muslc.x86_64.a",

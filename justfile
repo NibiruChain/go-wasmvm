@@ -68,10 +68,61 @@ scripts-fmt-check:
   shfmt --diff .
 
 # Run Rust clippy.
-clippy:
+lint-rs:
   (cd libwasmvm && cargo clippy --all-targets -- -D warnings)
 
-alias lint := clippy
+alias clippy := lint-rs
+
+# Run Go linting. Local runs default to --fix; CI should pass --fix=false.
+lint-go *args:
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  image_version="v2.6.1"
+  lint_args=({{args}})
+  if [ "${#lint_args[@]}" -eq 0 ]; then
+    lint_args=(--fix)
+  fi
+
+  lint_cmd=(golangci-lint run -v "${lint_args[@]}")
+
+  if command -v golangci-lint >/dev/null 2>&1; then
+    local_version="$(golangci-lint version --short 2>/dev/null || true)"
+    image_major="${image_version#v}"
+    image_major="${image_major%%.*}"
+    local_major="${local_version#v}"
+    local_major="${local_major%%.*}"
+
+    if [ "$local_version" = "$image_version" ] || [ "v$local_version" = "$image_version" ]; then
+      GOLANGCI_LINT_CACHE="${GOLANGCI_LINT_CACHE:-/tmp/wasmvm-golangci-lint-cache}" "${lint_cmd[@]}"
+      exit 0
+    fi
+
+    if [ -n "$local_major" ] && [ "$local_major" = "$image_major" ]; then
+      echo "warning: running local golangci-lint ${local_version}; repo pins $image_version" >&2
+      GOLANGCI_LINT_CACHE="${GOLANGCI_LINT_CACHE:-/tmp/wasmvm-golangci-lint-cache}" "${lint_cmd[@]}"
+      exit 0
+    fi
+
+    echo "warning: local golangci-lint version ${local_version:-unknown} does not match $image_version; using Docker" >&2
+  fi
+
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "docker is required when golangci-lint $image_version is not installed locally" >&2
+    exit 1
+  fi
+
+  docker run --rm \
+    -v "$PWD":/app \
+    -v "${GOLANGCI_LINT_CACHE:-$HOME/.cache/golangci-lint/$image_version}":/root/.cache \
+    -w /app \
+    "golangci/golangci-lint:$image_version" \
+    "${lint_cmd[@]}"
+
+# Run Rust and Go linting.
+lint:
+  just lint-rs
+  just lint-go
 
 # Run Rust unit tests.
 test:

@@ -1,4 +1,4 @@
-name: build artifacts
+name: build
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 # Builds release candidate libwasmvm artifacts on ordinary branch and PR runs.
-# Durable GitHub Release publishing only runs from release/nibiru.
+# Durable GitHub Release publishing only runs from main.
 jobs:
   build-static-libs:
     name: static musl libraries
@@ -45,6 +45,21 @@ jobs:
             artifacts/static-musl/libwasmvm_muslc.aarch64.a
             artifacts/static-musl/checksums.txt
           if-no-files-found: error
+
+  # TODO: Enable this when static musl Go consumer tests are worth the runtime
+  # cost. This is stronger than building artifacts because it exercises the Go
+  # packages with tag `muslc` inside Alpine.
+  alpine-muslc-go-tests:
+    name: Alpine muslc Go tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ vars.ENABLE_ALPINE_MUSLC_GO_TESTS == 'true' }}
+
+      - name: Build static musl library and run Alpine Go tests
+        if: ${{ vars.ENABLE_ALPINE_MUSLC_GO_TESTS == 'true' }}
+        run: make test-alpine
 
   build-shared-linux:
     name: Linux shared libraries
@@ -137,7 +152,7 @@ jobs:
     needs:
       - build-static-libs
       - build-shared-linux
-    if: github.event_name == 'push' && github.ref == 'refs/heads/release/nibiru'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -154,8 +169,8 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Use tested commit as local release branch
-        run: git checkout -B release/nibiru "$GITHUB_SHA"
+      - name: Use tested commit as local main branch
+        run: git checkout -B main "$GITHUB_SHA"
 
       - name: Install just
         uses: taiki-e/install-action@v2

@@ -300,7 +300,7 @@ describe("publishArtifacts", () => {
       artifactsDir,
       runner: async (command) => {
         commands.push(command)
-        if (command === "git branch --show-current") return "release/nibiru\n"
+        if (command === "git branch --show-current") return "main\n"
         if (command === "git rev-parse HEAD") return "abc123\n"
         if (command === `git tag --list "v*.*.*"`) return "v1.5.9\n"
 
@@ -356,7 +356,7 @@ describe("publishArtifacts", () => {
       artifactsDir,
       runner: async (command) => {
         commands.push(command)
-        if (command === "git branch --show-current") return "release/nibiru\n"
+        if (command === "git branch --show-current") return "main\n"
         if (command === "git rev-parse HEAD") return "abc123\n"
         if (command === `git tag --list "v*.*.*"`) return "v1.6.0\n"
         if (command === "command -v gh >/dev/null 2>&1") return ""
@@ -386,7 +386,7 @@ describe("publishArtifacts", () => {
         run: true,
         artifactsDir,
         runner: async (command) => {
-          if (command === "git branch --show-current") return "release/nibiru\n"
+          if (command === "git branch --show-current") return "main\n"
           if (command === "git rev-parse HEAD") return "abc123\n"
           if (command === `git tag --list "v*.*.*"`) return "v1.6.0\n"
           if (command === "command -v gh >/dev/null 2>&1") return ""
