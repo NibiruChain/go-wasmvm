@@ -39,7 +39,7 @@ time = { version = "0.3.36", features = ["formatting"] }
 
 [dependencies.cosmwasm-vm]
 git = "https://github.com/NibiruChain/nibiru-wasm.git"
-rev = "740a119e4f626720d97f4079016d2b2822d9f947"
+rev = "5811a0a2200bc955d57b199a81139489a7c947e0"
 features = [
   "staking",
   "stargate",
