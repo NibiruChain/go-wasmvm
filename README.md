@@ -1,3 +1,21 @@
+# Archived: WasmVM development moved to Nibiru
+
+This repository is a public archive. The maintained codebase is
+[NibiruChain/nibiru, directory `lib/wasmvm`](https://github.com/NibiruChain/nibiru/tree/main/lib/wasmvm).
+
+Use the Nibiru monorepo for development, issues, builds, and releases. Start
+with the [WasmVM README](https://github.com/NibiruChain/nibiru/blob/main/lib/wasmvm/README.md)
+for build and release instructions. Its Rust runtime dependencies live under
+[`lib/cosmwasm-vm`](https://github.com/NibiruChain/nibiru/tree/main/lib/cosmwasm-vm)
+and [`lib/wasmer`](https://github.com/NibiruChain/nibiru/tree/main/lib/wasmer).
+
+Standalone automation has been removed. Existing branches, tags, and releases
+remain available as historical references. The README below describes the
+archived standalone repository; follow the monorepo instructions for maintained
+code.
+
+---
+
 # wasmvm
 
 This is a wrapper around the
